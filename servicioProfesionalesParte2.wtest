@@ -1,0 +1,65 @@
+import universidad.*
+import profesionales.*
+import empresaServicio.*
+import solicitantes.*
+
+describe "Etapa 2 - Solicitantes" {
+    const uSanMartin = new Universidad(
+        nombre = "Universidad de San Martín",
+        provincia = "Buenos Aires",
+        honorariosRecomendados = 3500
+    )
+    const uRosario = new Universidad(
+        nombre = "Universidad de Rosario",
+        provincia = "Santa Fe",
+        honorariosRecomendados = 2800
+    )
+    const uHurlingham = new Universidad(
+        nombre = "Universidad de Hurlingham",
+        provincia = "Buenos Aires",
+        honorariosRecomendados = 8800
+    )
+    const uCorrientes = new Universidad(
+        nombre = "Universidad de Corrientes",
+        provincia = "Corrientes",
+        honorariosRecomendados = 4200
+    )
+    const juana = new ProfesionalVinculado(universidad = uRosario)
+    const melina = new ProfesionalAsociadoDelLitoral(universidad = uCorrientes)
+    const rocio = new ProfesionalLibre(
+        universidad = uHurlingham,
+        honorariosPorHora = 5000,
+        provinciasHabilitadas = #{"Santa Fe", "Córdoba", "Buenos Aires"}
+    )
+    const luciana = new ProfesionalLibre(
+        universidad = uRosario,
+        honorariosPorHora = 3200,
+        provinciasHabilitadas = #{"Santa Fe", "Entre Ríos"}
+    )
+    const empresa = new EmpresaDeServicios(
+        honorarioDeReferencia = 3500,
+        profesionales = #{juana, melina, rocio, luciana}
+    )
+    test "empresa puede satisfacer a persona de Santa Fe" {
+        const persona = new Persona(provincia = "Santa Fe")
+        assert.that(empresa.puedeSatisfacer(persona))
+    }
+    test "empresa puede satisfacer a institución que reconoce Hurlingham" {
+        const institucion = new Institucion(
+            universidadesReconocidas = #{uHurlingham}
+        )
+        assert.that(empresa.puedeSatisfacer(institucion))
+    }
+    test "empresa NO puede satisfacer a persona de provincia no cubierta" {
+        const persona = new Persona(provincia = "Chubut")
+        assert.notThat(empresa.puedeSatisfacer(persona))
+    }
+    test "empresa puede satisfacer a club en Corrientes y Misiones" {
+        const club = new Club(provincias = #{"Corrientes", "Misiones"})
+        assert.that(empresa.puedeSatisfacer(club))
+    }
+    test "empresa NO puede satisfacer a club solo en Misiones" {
+        const club = new Club(provincias = #{"Misiones"})
+        assert.notThat(empresa.puedeSatisfacer(club))
+    }
+}

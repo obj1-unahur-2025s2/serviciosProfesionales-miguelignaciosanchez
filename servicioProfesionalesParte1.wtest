@@ -1,0 +1,75 @@
+import universidad.*
+import profesionales.*
+import empresaServicio.*
+
+describe "Etapa 1 - Profesionales y Empresas" {
+    const uSanMartin = new Universidad(
+        nombre = "Universidad de San Martín",
+        provincia = "Buenos Aires",
+        honorariosRecomendados = 3500
+    )
+    const uRosario = new Universidad(
+        nombre = "Universidad de Rosario",
+        provincia = "Santa Fe",
+        honorariosRecomendados = 2800
+    )
+    const uCorrientes = new Universidad(
+        nombre = "Universidad de Corrientes",
+        provincia = "Corrientes",
+        honorariosRecomendados = 4200
+    )
+    const uHurlingham = new Universidad(
+        nombre = "Universidad de Hurlingham",
+        provincia = "Buenos Aires",
+        honorariosRecomendados = 8800
+    )
+    const juana = new ProfesionalVinculado(universidad = uRosario)
+    const melina = new ProfesionalAsociadoDelLitoral(universidad = uCorrientes)
+    const rocio = new ProfesionalLibre(
+        universidad = uHurlingham,
+        honorariosPorHora = 5000,
+        provinciasHabilitadas = #{"Santa Fe", "Córdoba", "Buenos Aires"}
+    )
+    const luciana = new ProfesionalLibre(
+        universidad = uRosario,
+        honorariosPorHora = 3200,
+        provinciasHabilitadas = #{"Santa Fe", "Entre Ríos"}
+    )
+    const empresa = new EmpresaDeServicios(
+        honorarioDeReferencia = 3500,
+        profesionales = #{juana, melina, rocio, luciana}
+    )
+    test "cantidad de profesionales que estudiaron en Rosario" {
+        assert.equals(2, empresa.cantidadProfesionalesEstudiaronEn(uRosario))
+    }
+    test "cantidad de profesionales que estudiaron en Hurlingham" {
+        assert.equals(1, empresa.cantidadProfesionalesEstudiaronEn(uHurlingham))
+    }
+    test "cantidad de profesionales que estudiaron en San Martín" {
+        assert.equals(0, empresa.cantidadProfesionalesEstudiaronEn(uSanMartin))
+    }
+    test "profesionales caros - solo Rocío" {
+        const caros = empresa.profesionalesCaros()
+        assert.equals(1, caros.size())
+        assert.that(caros.contains(rocio))
+    }
+    test "universidades formadoras son Rosario, Corrientes y Hurlingham" {
+        const universidades = empresa.universidadesFormadoras()
+        assert.equals(3, universidades.size())
+        assert.that(universidades.contains(uRosario))
+        assert.that(universidades.contains(uCorrientes))
+        assert.that(universidades.contains(uHurlingham))
+        assert.notThat(universidades.contains(uSanMartin))
+    }
+    test "profesional más barato es Juana" {
+        assert.equals(juana, empresa.profesionalMasBarato())
+    }
+    test "la empresa es de gente acotada" {
+        assert.that(empresa.esDeGenteAcotada())
+    }
+    test "la empresa NO es de gente acotada si Luciana trabaja en 5 provincias" {
+        luciana.provinciasHabilitadas().add("Corrientes")
+        luciana.provinciasHabilitadas().add("Misiones")
+        assert.notThat(empresa.esDeGenteAcotada())
+    }
+}

@@ -1,0 +1,61 @@
+import universidad.*
+import profesionales.*
+
+describe "Etapa 3 - Cobros" {
+    const uRosario = new Universidad(
+        nombre = "Universidad de Rosario",
+        provincia = "Santa Fe",
+        honorariosRecomendados = 2800
+    )
+    const uCorrientes = new Universidad(
+        nombre = "Universidad de Corrientes",
+        provincia = "Corrientes",
+        honorariosRecomendados = 4200
+    )
+    const uHurlingham = new Universidad(
+        nombre = "Universidad de Hurlingham",
+        provincia = "Buenos Aires",
+        honorariosRecomendados = 8800
+    )
+    const juana = new ProfesionalVinculado(universidad = uRosario)
+    const melina = new ProfesionalAsociadoDelLitoral(universidad = uCorrientes)
+    const rocio = new ProfesionalLibre(
+        universidad = uHurlingham,
+        honorariosPorHora = 5000,
+        provinciasHabilitadas = #{"Santa Fe", "Córdoba", "Buenos Aires"}
+    )
+    const luciana = new ProfesionalLibre(
+        universidad = uRosario,
+        honorariosPorHora = 3200,
+        provinciasHabilitadas = #{"Santa Fe", "Entre Ríos"}
+    )
+    test "profesional vinculado dona la mitad a su universidad" {
+        const donacionesInicial = uRosario.donacionesRecibidas()
+        juana.cobrar(1000)
+        assert.equals(donacionesInicial + 500, uRosario.donacionesRecibidas())
+    }
+    test "profesional vinculado dona correctamente con monto impar" {
+        const donacionesInicial = uRosario.donacionesRecibidas()
+        juana.cobrar(1001)
+        assert.equals(donacionesInicial + 500.5, uRosario.donacionesRecibidas())
+    }
+    test "profesional asociado da todo a la asociación" {
+        const recaudacionInicial = asociacionProfesionalesLitoral.totalRecaudado()
+        melina.cobrar(2000)
+        assert.equals(recaudacionInicial + 2000, asociacionProfesionalesLitoral.totalRecaudado())
+    }
+    test "profesional libre se guarda todo lo que cobra" {
+        const recaudadoInicial = rocio.totalRecaudado()
+        rocio.cobrar(3000)
+        assert.equals(recaudadoInicial + 3000, rocio.totalRecaudado())
+    }
+    test "profesional libre puede pasar dinero a otro profesional libre" {
+        luciana.cobrar(10000)
+        rocio.cobrar(12000)
+        const recaudadoLucianaAntes = luciana.totalRecaudado()
+        const recaudadoRocioAntes = rocio.totalRecaudado()
+        rocio.pasarDinero(luciana, 4000)
+        assert.equals(recaudadoRocioAntes - 4000, rocio.totalRecaudado())
+        assert.equals(recaudadoLucianaAntes + 4000, luciana.totalRecaudado())
+    }
+}

@@ -1,0 +1,74 @@
+import universidad.*
+import profesionales.*
+import empresaServicio.*
+import solicitantes.*
+
+describe "Etapa 4 - Registro de Trabajos" {
+    const uRosario = new Universidad(
+        nombre = "Universidad de Rosario",
+        provincia = "Santa Fe",
+        honorariosRecomendados = 2800
+    )
+    const uCorrientes = new Universidad(
+        nombre = "Universidad de Corrientes",
+        provincia = "Corrientes",
+        honorariosRecomendados = 4200
+    )
+    const uHurlingham = new Universidad(
+        nombre = "Universidad de Hurlingham",
+        provincia = "Buenos Aires",
+        honorariosRecomendados = 8800
+    )
+    const juana = new ProfesionalVinculado(universidad = uRosario)
+    const melina = new ProfesionalAsociadoDelLitoral(universidad = uCorrientes)
+    const rocio = new ProfesionalLibre(
+        universidad = uHurlingham,
+        honorariosPorHora = 5000,
+        provinciasHabilitadas = #{"Santa Fe", "Córdoba", "Buenos Aires"}
+    )
+    const luciana = new ProfesionalLibre(
+        universidad = uRosario,
+        honorariosPorHora = 3200,
+        provinciasHabilitadas = #{"Santa Fe", "Entre Ríos"}
+    )
+    const empresa = new EmpresaDeServicios(
+        honorarioDeReferencia = 3500,
+        profesionales = #{juana, melina, rocio, luciana}
+    )
+    test "dar servicio registra al cliente" {
+        const persona = new Persona(provincia = "Santa Fe")
+        empresa.darServicio(persona)
+        assert.that(empresa.tieneComoCliente(persona))
+        assert.equals(1, empresa.cantidadClientes())
+    }
+    test "dar servicio a un solicitante que no puede ser atendido lanza error" {
+        const persona = new Persona(provincia = "Chubut")
+        assert.throwsException({ empresa.darServicio(persona) })
+    }
+    test "dar servicio a múltiples clientes" {
+        const persona1 = new Persona(provincia = "Santa Fe")
+        const persona2 = new Persona(provincia = "Corrientes")
+        empresa.darServicio(persona1)
+        empresa.darServicio(persona2)
+        assert.equals(2, empresa.cantidadClientes())
+        assert.that(empresa.tieneComoCliente(persona1))
+        assert.that(empresa.tieneComoCliente(persona2))
+    }
+    test "dar servicio al mismo cliente dos veces no lo duplica" {
+        const persona = new Persona(provincia = "Santa Fe")
+        empresa.darServicio(persona)
+        empresa.darServicio(persona)
+        assert.equals(1, empresa.cantidadClientes())
+    }
+    test "empresa sin clientes tiene 0 clientes" {
+        const empresaNueva = new EmpresaDeServicios(
+            honorarioDeReferencia = 3000,
+            profesionales = #{juana}
+        )
+        assert.equals(0, empresaNueva.cantidadClientes())
+    }
+    test "tieneComoCliente retorna false si no es cliente" {
+        const persona = new Persona(provincia = "Santa Fe")
+        assert.notThat(empresa.tieneComoCliente(persona))
+    }
+}

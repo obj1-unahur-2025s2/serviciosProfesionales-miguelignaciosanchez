@@ -1,0 +1,22 @@
+import universidad.*
+import profesionales.*
+import empresaServicio.*
+
+describe "Desafío Final - Profesional Poco Atractivo" {
+    const uRosario = new Universidad(nombre="Universidad de Rosario", provincia="Santa Fe", honorariosRecomendados=2800)
+    const juana = new ProfesionalVinculado(universidad = uRosario)
+    const melina = new ProfesionalAsociadoDelLitoral(universidad = new Universidad(nombre="Universidad Corrientes", provincia="Corrientes", honorariosRecomendados=4200))
+    const empresa = new EmpresaDeServicios(
+        honorarioDeReferencia = 3500,
+        profesionales = #{juana, melina}
+    )
+    test "profesional único en su provincia NO es poco atractivo" {
+        assert.notThat(empresa.esPocoAtractivo(juana))
+    }
+    test "profesional con otro más barato en todas sus provincias es poco atractivo" {
+        const uBarata = new Universidad(nombre="Universidad Barata", provincia="Santa Fe", honorariosRecomendados=2000)
+        const profBarato = new ProfesionalVinculado(universidad = uBarata)
+        empresa.contratar(profBarato)
+        assert.that(empresa.esPocoAtractivo(juana))
+    }
+}
